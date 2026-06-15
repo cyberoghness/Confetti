@@ -11,7 +11,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
-const serverEntry = resolve(root, "dist/server/index.mjs");
+const serverEntry = resolve(root, "dist/server/server.js");
 const clientDir = resolve(root, "dist/client");
 const outFile = resolve(clientDir, "index.html");
 
