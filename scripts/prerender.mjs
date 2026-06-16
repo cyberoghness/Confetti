@@ -11,14 +11,27 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
-const serverEntry = resolve(root, "dist/server/index.mjs");
 const clientDir = resolve(root, "dist/client");
 const outFile = resolve(clientDir, "index.html");
 
-if (!existsSync(serverEntry)) {
-  console.error(`[prerender] missing ${serverEntry} — run 'vite build' first`);
+// @lovable.dev/vite-tanstack-config may output either:
+//   dist/server/index.mjs  — nitro cloudflare-module target
+//   dist/server/server.js  — nitro node / cloudflare-pages target
+// Try both so the script works regardless of which nitro preset is active.
+const candidates = [
+  resolve(root, "dist/server/index.mjs"),
+  resolve(root, "dist/server/server.js"),
+];
+const serverEntry = candidates.find(existsSync);
+
+if (!serverEntry) {
+  console.error(
+    `[prerender] Could not find a server entry. Tried:\n  ${candidates.join("\n  ")}\nRun 'vite build' first.`
+  );
   process.exit(1);
 }
+
+console.log(`[prerender] Using server entry: ${serverEntry}`);
 
 // Polyfill envs nitro/cloudflare bundle might reference.
 process.env.NODE_ENV = process.env.NODE_ENV || "production";
